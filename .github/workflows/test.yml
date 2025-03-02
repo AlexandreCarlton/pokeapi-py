@@ -21,7 +21,7 @@ jobs:
           python-version-file: .python-version
 
       - name: Run lint
-        run: uv run --groups dev -- ruff check
+        run: uv run --group dev -- ruff check
 
       - name: Run tests
-        run: uv run --groups test -- pytest -v
+        run: uv run --group test -- pytest -v
