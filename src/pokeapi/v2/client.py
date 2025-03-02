@@ -1,5 +1,3 @@
-from functools import lru_cache
-
 import aiohttp
 from async_lru import alru_cache
 from pydantic import BaseModel
@@ -36,15 +34,14 @@ class PokeApiClient:
 
 
     async def _get_resource[M: BaseModel](self, resource: str, id_or_name: str | int, clas: type[M]) -> M:
-        json_response = await self._load_json(f'{self.endpoint}/api/v2/{resource}/{id_or_name}')
-        return clas.model_validate(json_response)
+        return await self._get_model(f'{self.endpoint}/api/v2/{resource}/{id_or_name}', clas)
 
     async def _get_resource_list[M: BaseModel](self, resource: str, clas: type[M]) -> NamedApiResourceList[M]:
-        json_response = await self._load_json(f'{self.endpoint}/api/v2/{resource}?limit=10000')
-        return NamedApiResourceList[clas].model_validate(json_response)
+        return await self._get_model(f'{self.endpoint}/api/v2/{resource}?limit=10000', NamedApiResourceList[clas])
 
     @alru_cache(maxsize=None)
-    async def _load_json(self, url: str):
-        """Simple function to download and memoize JSON from a given URL"""
+    async def _get_model[M: BaseModel](self, url: str, clas: type[M]) -> M:
+        """Downloads JSON from a given URL, parses it, and memoizes it."""
         async with self._session.get(url) as response:
-            return await response.json()
+            json_response = await response.json()
+            return clas.model_validate(json_response)

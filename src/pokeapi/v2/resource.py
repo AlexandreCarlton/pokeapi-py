@@ -20,8 +20,7 @@ class ApiResource(BaseModel, Generic[Resource]):
         As PokeAPI does not provide a bulk-fetch API, this is not as terrible
         as it looks."""
         model = self._get_type_parameter()
-        json_response = await client._load_json(self.url)
-        return model.model_validate(json_response)
+        return await client._get_model(self.url, model)
 
     def _get_type_parameter(self) -> type[Resource]:
         """Load the type parameter's class hackily as Python 3.13 does not
