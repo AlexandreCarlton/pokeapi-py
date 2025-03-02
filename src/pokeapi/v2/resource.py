@@ -4,8 +4,6 @@ from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
-from .load_json import load_json
-
 GENERIC_CLASS_PATTERN = re.compile('.+\\[(.+)\\]$')
 MODELS_MODULE = import_module('pokeapi.v2.models')
 
@@ -17,12 +15,12 @@ class ApiResource(BaseModel, Generic[Resource]):
     """
     url: str
 
-    def load(self) -> Resource:
-        """Loads the named resource.
+    def get(self, client) -> Resource:
+        """Loads the named resource using the provided client.
         As PokeAPI does not provide a bulk-fetch API, this is not as terrible
         as it looks."""
         model = self._get_type_parameter()
-        return model.model_validate(load_json(self.url))
+        return model.model_validate(client._load_json(self.url))
 
     def _get_type_parameter(self) -> type[Resource]:
         """Load the type parameter's class hackily as Python 3.13 does not

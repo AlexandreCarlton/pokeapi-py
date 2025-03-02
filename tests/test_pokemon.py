@@ -34,5 +34,5 @@ def test_species(client: PokeApiClient, id_or_name: int | str, pokemon_json: dic
 @pytest.mark.parametrize('id_or_name,pokemon_json', PARAMETERS)
 def test_species_load(client: PokeApiClient, id_or_name: int | str, pokemon_json: dict[str, Any]):
     pokemon = client.pokemon(id_or_name)
-    species = pokemon.species.load()
+    species = pokemon.species.get(client)
     assert isinstance(species, PokemonSpecies)

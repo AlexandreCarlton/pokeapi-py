@@ -22,10 +22,10 @@ def pokeapi_container(request):
                .with_bind_ports(80, PORT))
     pokeapi.start()
     wait_for_logs(pokeapi, 'Configuration complete; ready for start up')
-    def remove_container():
-        pokeapi.stop()
-    request.addfinalizer(remove_container)
+    yield
+    pokeapi.stop()
 
 @pytest.fixture(scope="session")
 def client(request):
-    return PokeApiClient(ENDPOINT)
+    with PokeApiClient(ENDPOINT) as pokeapi_client:
+        yield pokeapi_client
