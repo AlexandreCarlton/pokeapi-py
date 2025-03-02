@@ -1,28 +1,25 @@
 import re
 from importlib import import_module
-from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
 GENERIC_CLASS_PATTERN = re.compile('.+\\[(.+)\\]$')
 MODELS_MODULE = import_module('pokeapi.v2.models')
 
-Resource = TypeVar('Resource', bound=BaseModel)
-
-class ApiResource(BaseModel, Generic[Resource]):
+class ApiResource[T: BaseModel](BaseModel):
     """
     See https://pokeapi.co/docs/v2#apiresource
     """
     url: str
 
-    async def get(self, client) -> Resource:
+    async def get(self, client) -> T:
         """Loads the named resource using the provided client.
         As PokeAPI does not provide a bulk-fetch API, this is not as terrible
         as it looks."""
         model = self._get_type_parameter()
         return await client._get_model(model, self.url)
 
-    def _get_type_parameter(self) -> type[Resource]:
+    def _get_type_parameter(self) -> type[T]:
         """Load the type parameter's class hackily as Python 3.13 does not
         offer a way to do this cleanly. """
         match = GENERIC_CLASS_PATTERN.match(self.__class__.__name__)
@@ -32,21 +29,21 @@ class ApiResource(BaseModel, Generic[Resource]):
         return getattr(MODELS_MODULE, resource_class_name)
 
 
-class NamedApiResource(ApiResource, Generic[Resource]):
+class NamedApiResource[T: BaseModel](ApiResource[T]):
     """
     See https://pokeapi.co/docs/v2#namedapiresource
     """
     name: str
 
-class ApiResourceList(BaseModel, Generic[Resource]):
+class ApiResourceList[T: BaseModel](BaseModel):
     """
     See https://pokeapi.co/docs/v2#apiresourcelist
     """
-    results: list[ApiResource[Resource]]
+    results: list[ApiResource[T]]
 
 
-class NamedApiResourceList(BaseModel, Generic[Resource]):
+class NamedApiResourceList[T: BaseModel](BaseModel):
     """
     See https://pokeapi.co/docs/v2#namedapiresourcelist
     """
-    results: list[NamedApiResource[Resource]]
+    results: list[NamedApiResource[T]]

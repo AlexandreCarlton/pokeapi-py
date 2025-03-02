@@ -40,7 +40,7 @@ class PokeApiClient:
 
     async def _get_resource_list[M: BaseModel](self, resource: str, limit: Optional[int], offset: Optional[int], clas: type[M]) -> NamedApiResourceList[M]:
         # Mypy wants to be able to resolve this statically but it can't, so we suppress this.
-        resource_list_type = NamedApiResourceList[clas] # type: ignore
+        resource_list_type = NamedApiResourceList[clas] # type: ignore [valid-type]
         return await self._get_model(resource_list_type, f'{self.endpoint}/api/v2/{resource}', PokeApiClient._to_params(limit, offset)) # type: ignore
 
     @staticmethod
