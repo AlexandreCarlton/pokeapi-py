@@ -28,12 +28,16 @@ uv add git+https://github.com/AlexandreCarlton/pokeapi-py.git
 The following is a straightforward usage of the client.
 
 ```python
-from pokeapi.client import PokeApiClient
+from pokeapi.v2.client import PokeApiClient
 
-client = PokeApiClient()
-bulbasaur = client.pokemon(1)
-print(bulbasaur.name) # 'bulbasaur'
+async def main():
+  async with PokeApiClient() as client:
+    bulbasaur = await client.pokemon(1)
+    print(bulbasaur.name) # 'bulbasaur'
 ```
+
+Only `async` methods are supported as this provides more control on how to
+manage concurrency (given this library's heavy reliance on network operations).
 
 ### Custom endpoint
 
@@ -42,10 +46,11 @@ different endpoint be desired (e.g. [AlexandreCarlton/pokeapi-dump](https://gith
 the following can be used:
 
 ```python
-from pokeapi.client import PokeApiClient
+from pokeapi.v2.client import PokeApiClient
 
 # Connects to a local instance running on 8080.
-client = PokeApiClient(endpoint="https://localhost:8080")
+async with PokeApiClient(endpoint="https://localhost:8080") as client:
+  # ...
 ```
 
 ## FAQ

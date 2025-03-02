@@ -1,6 +1,7 @@
 from functools import lru_cache
 
-import requests
+import aiohttp
+from async_lru import alru_cache
 from pydantic import BaseModel
 
 from .models import Pokemon, PokemonSpecies
@@ -10,37 +11,40 @@ class PokeApiClient:
 
     def __init__(self, endpoint: str = "https://pokeapi.co"):
         self.endpoint = endpoint
-        self._session = requests.Session()
+        self._session = aiohttp.ClientSession()
 
 
-    def __enter__(self):
-        self._session.__enter__()
+    async def __aenter__(self):
+        await self._session.__aenter__()
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        self._session.__exit__(exc_type, exc_value, traceback)
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self._session.__aexit__(exc_type, exc_value, traceback)
 
 
-    def pokemon(self, id_or_name: int | str) -> Pokemon:
-        return self._get_resource('pokemon', id_or_name, Pokemon)
+    async def pokemon(self, id_or_name: int | str) -> Pokemon:
+        return await self._get_resource('pokemon', id_or_name, Pokemon)
 
-    def pokemon_list(self) -> NamedApiResourceList[Pokemon]:
-        return self._get_resource_list('pokemon', Pokemon)
+    async def pokemon_list(self) -> NamedApiResourceList[Pokemon]:
+        return await self._get_resource_list('pokemon', Pokemon)
 
-    def pokemon_species(self, id_or_name: int | str) -> PokemonSpecies:
-        return self._get_resource('pokemon-species', id_or_name, PokemonSpecies)
+    async def pokemon_species(self, id_or_name: int | str) -> PokemonSpecies:
+        return await self._get_resource('pokemon-species', id_or_name, PokemonSpecies)
 
-    def pokemon_species_list(self) -> NamedApiResourceList[PokemonSpecies]:
-        return self._get_resource_list('pokemon-species', PokemonSpecies)
+    async def pokemon_species_list(self) -> NamedApiResourceList[PokemonSpecies]:
+        return await self._get_resource_list('pokemon-species', PokemonSpecies)
 
 
-    def _get_resource[M: BaseModel](self, resource: str, id_or_name: str | int, clas: type[M]) -> M:
-        return clas.model_validate(self._load_json(f'{self.endpoint}/api/v2/{resource}/{id_or_name}'))
+    async def _get_resource[M: BaseModel](self, resource: str, id_or_name: str | int, clas: type[M]) -> M:
+        json_response = await self._load_json(f'{self.endpoint}/api/v2/{resource}/{id_or_name}')
+        return clas.model_validate(json_response)
 
-    def _get_resource_list[M: BaseModel](self, resource: str, clas: type[M]) -> NamedApiResourceList[M]:
-        return NamedApiResourceList[clas].model_validate(self._load_json(f'{self.endpoint}/api/v2/{resource}?limit=10000'))
+    async def _get_resource_list[M: BaseModel](self, resource: str, clas: type[M]) -> NamedApiResourceList[M]:
+        json_response = await self._load_json(f'{self.endpoint}/api/v2/{resource}?limit=10000')
+        return NamedApiResourceList[clas].model_validate(json_response)
 
-    @lru_cache(maxsize=None)
-    def _load_json(self, url: str):
+    @alru_cache(maxsize=None)
+    async def _load_json(self, url: str):
         """Simple function to download and memoize JSON from a given URL"""
-        return self._session.get(url).json()
+        async with self._session.get(url) as response:
+            return await response.json()

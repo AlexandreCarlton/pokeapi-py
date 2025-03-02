@@ -11,6 +11,6 @@ PARAMETERS = [
 ]
 
 @pytest.mark.parametrize('id_or_name,species_json', PARAMETERS)
-def test_base_happiness(client: PokeApiClient, id_or_name: int | str, species_json: dict[str, Any]):
-    species = client.pokemon_species(id_or_name)
+async def test_base_happiness(client: PokeApiClient, id_or_name: int | str, species_json: dict[str, Any]):
+    species = await client.pokemon_species(id_or_name)
     assert species.base_happiness == species_json['base_happiness']

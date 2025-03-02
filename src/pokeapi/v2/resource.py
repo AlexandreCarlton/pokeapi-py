@@ -15,12 +15,13 @@ class ApiResource(BaseModel, Generic[Resource]):
     """
     url: str
 
-    def get(self, client) -> Resource:
+    async def get(self, client) -> Resource:
         """Loads the named resource using the provided client.
         As PokeAPI does not provide a bulk-fetch API, this is not as terrible
         as it looks."""
         model = self._get_type_parameter()
-        return model.model_validate(client._load_json(self.url))
+        json_response = await client._load_json(self.url)
+        return model.model_validate(json_response)
 
     def _get_type_parameter(self) -> type[Resource]:
         """Load the type parameter's class hackily as Python 3.13 does not

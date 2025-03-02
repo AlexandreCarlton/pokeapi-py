@@ -25,7 +25,7 @@ def pokeapi_container(request):
     yield
     pokeapi.stop()
 
-@pytest.fixture(scope="session")
-def client(request):
-    with PokeApiClient(ENDPOINT) as pokeapi_client:
+@pytest.fixture
+async def client(request):
+    async with PokeApiClient(ENDPOINT) as pokeapi_client:
         yield pokeapi_client
