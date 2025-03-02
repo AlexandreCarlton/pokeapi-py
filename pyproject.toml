@@ -32,8 +32,11 @@ test = [
     "testcontainers==4.9.0",
 ]
 dev = [
-    "ruff==0.9.9",
     "python-lsp-server==1.12.2",
+]
+lint = [
+    "mypy>=1.15.0",
+    "ruff>=0.9.9",
 ]
 
 [project.urls]

@@ -8,7 +8,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from .resource import ApiResource, NamedApiResource
+from pokeapi.v2.resource import ApiResource, NamedApiResource
 
 class NamedBaseModel(BaseModel):
     """Provides attributes common to all named models"""
