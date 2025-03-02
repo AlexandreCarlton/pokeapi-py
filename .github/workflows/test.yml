@@ -1,0 +1,27 @@
+---
+name: Test pokeapi-py
+on:
+  - push
+jobs:
+  Build:
+    runs-on: ubuntu-22.04
+    steps:
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.6.3"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - name: Run lint
+        run: uv run --groups dev -- ruff check
+
+      - name: Run tests
+        run: uv run --groups test -- pytest -v
