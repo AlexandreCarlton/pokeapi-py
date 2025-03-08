@@ -1,4 +1,5 @@
-from typing import Tuple, Optional, Sequence
+from types import TracebackType
+from typing import Tuple, Optional, Sequence, cast
 
 import aiohttp
 from async_lru import alru_cache
@@ -14,11 +15,11 @@ class PokeApiClient:
         self._session = aiohttp.ClientSession()
 
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> 'PokeApiClient':
         await self._session.__aenter__()
         return self
 
-    async def __aexit__(self, exc_type, exc_value, traceback):
+    async def __aexit__[E: BaseException](self, exc_type: type[E], exc_value: E, traceback: TracebackType) -> None:
         await self._session.__aexit__(exc_type, exc_value, traceback)
 
 
@@ -35,13 +36,16 @@ class PokeApiClient:
         return await self._get_resource_list('pokemon-species', limit, offset, PokemonSpecies)
 
 
-    async def _get_resource[M: BaseModel](self, resource: str, id_or_name: str | int, clas: type[M]) -> M:
-        return await self._get_model(clas, f'{self.endpoint}/api/v2/{resource}/{id_or_name}')
+    async def _get_resource[T: BaseModel](self, resource: str, id_or_name: str | int, clas: type[T]) -> T:
+        resource = await self._get_model(clas, f'{self.endpoint}/api/v2/{resource}/{id_or_name}')
+        return cast(T, resource)
 
-    async def _get_resource_list[M: BaseModel](self, resource: str, limit: Optional[int], offset: Optional[int], clas: type[M]) -> NamedApiResourceList[M]:
+    async def _get_resource_list[T: BaseModel](self, resource: str, limit: Optional[int], offset: Optional[int], clas: type[T]) -> NamedApiResourceList[T]:
         # Mypy wants to be able to resolve this statically but it can't, so we suppress this.
         resource_list_type = NamedApiResourceList[clas] # type: ignore [valid-type]
-        return await self._get_model(resource_list_type, f'{self.endpoint}/api/v2/{resource}', PokeApiClient._to_params(limit, offset)) # type: ignore
+        resource_list = await self._get_model(resource_list_type, f'{self.endpoint}/api/v2/{resource}', PokeApiClient._to_params(limit, offset))
+        return cast(NamedApiResourceList[T], resource_list)
+
 
     @staticmethod
     def _to_params(limit: Optional[int]=None, offset: Optional[int]=None) -> Sequence[Tuple[str, int]]:
@@ -51,7 +55,7 @@ class PokeApiClient:
 
 
     @alru_cache(maxsize=None)
-    async def _get_model[M: BaseModel](self, clas: type[M], url: str, params: Sequence[Tuple[str, int]]=()) -> M:
+    async def _get_model[T: BaseModel](self, clas: type[T], url: str, params: Sequence[Tuple[str, int]]=()) -> T:
         """Downloads JSON from a given URL, parses it, and memoizes it."""
         async with self._session.get(url, params=params) as response:
             json_response = await response.json()

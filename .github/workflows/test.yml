@@ -24,7 +24,7 @@ jobs:
         run: uv run --group lint -- ruff check
 
       - name: Run lint
-        run: uv run --group lint -- mypy src
+        run: uv run --group lint -- mypy src --strict
 
       - name: Run tests
         run: uv run --group test -- pytest -v
