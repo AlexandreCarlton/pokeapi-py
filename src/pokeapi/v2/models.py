@@ -6,20 +6,20 @@ Naming should derive from https://pokeapi.co/docs/v2
 
 from typing import Optional
 
-from pydantic import BaseModel
-
+from pokeapi.v2.base import PokeApiBaseType
 from pokeapi.v2.resource import ApiResource, NamedApiResource
 
-class NamedBaseModel(BaseModel):
+
+class NamedPokeApiType(PokeApiBaseType):
     """Provides attributes common to all named models"""
     id: int
     name: str
 
 
-class Characteristic(BaseModel):
+class Characteristic(PokeApiBaseType):
     id: int
 
-class Pokemon(NamedBaseModel):
+class Pokemon(NamedPokeApiType):
     height: int
     species: NamedApiResource['PokemonSpecies']
     sprites: 'PokemonSprites'
@@ -28,23 +28,23 @@ class Pokemon(NamedBaseModel):
     # Regrettably, this is not an ApiResource - see https://github.com/PokeAPI/pokeapi/issues/332
     location_area_encounters: str
 
-class PokemonColor(NamedBaseModel):
+class PokemonColor(NamedPokeApiType):
     pokemon_species: list[NamedApiResource['PokemonSpecies']]
 
-class PokemonSpecies(NamedBaseModel):
+class PokemonSpecies(NamedPokeApiType):
     base_happiness: Optional[int]
     capture_rate: int
     color: NamedApiResource['PokemonColor']
 
-class PokemonSprites(BaseModel):
+class PokemonSprites(PokeApiBaseType):
     front_default: Optional[str]
 
-class PokemonStat(BaseModel):
+class PokemonStat(PokeApiBaseType):
     base_stat: int
     effort: int
     stat: NamedApiResource['Stat']
 
-class Stat(NamedBaseModel):
+class Stat(NamedPokeApiType):
     game_index: int
     characteristics: list[ApiResource['Characteristic']]
     is_battle_only: bool

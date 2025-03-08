@@ -2,7 +2,7 @@ import re
 from importlib import import_module
 from typing import TYPE_CHECKING, cast
 
-from pydantic import BaseModel
+from pokeapi.v2.base import PokeApiBaseType
 
 if TYPE_CHECKING:
     from pokeapi.v2.client import PokeApiClient
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 GENERIC_CLASS_PATTERN = re.compile('.+\\[(.+)\\]$')
 MODELS_MODULE = import_module('pokeapi.v2.models')
 
-class ApiResource[T: BaseModel](BaseModel):
+class ApiResource[T: PokeApiBaseType](PokeApiBaseType):
     """
     See https://pokeapi.co/docs/v2#apiresource
     """
@@ -34,20 +34,20 @@ class ApiResource[T: BaseModel](BaseModel):
         return cast(type[T], getattr(MODELS_MODULE, resource_class_name))
 
 
-class NamedApiResource[T: BaseModel](ApiResource[T]):
+class NamedApiResource[T: PokeApiBaseType](ApiResource[T]):
     """
     See https://pokeapi.co/docs/v2#namedapiresource
     """
     name: str
 
-class ApiResourceList[T: BaseModel](BaseModel):
+class ApiResourceList[T: PokeApiBaseType](PokeApiBaseType):
     """
     See https://pokeapi.co/docs/v2#apiresourcelist
     """
     results: list[ApiResource[T]]
 
 
-class NamedApiResourceList[T: BaseModel](BaseModel):
+class NamedApiResourceList[T: PokeApiBaseType](PokeApiBaseType):
     """
     See https://pokeapi.co/docs/v2#namedapiresourcelist
     """
