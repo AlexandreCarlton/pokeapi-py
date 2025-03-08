@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 import re
 from importlib import import_module
 from typing import TYPE_CHECKING, cast
@@ -44,11 +45,11 @@ class ApiResourceList[T: PokeApiBaseType](PokeApiBaseType):
     """
     See https://pokeapi.co/docs/v2#apiresourcelist
     """
-    results: list[ApiResource[T]]
+    results: Sequence[ApiResource[T]]
 
 
 class NamedApiResourceList[T: PokeApiBaseType](PokeApiBaseType):
     """
     See https://pokeapi.co/docs/v2#namedapiresourcelist
     """
-    results: list[NamedApiResource[T]]
+    results: Sequence[NamedApiResource[T]]
