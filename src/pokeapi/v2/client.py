@@ -1,5 +1,5 @@
 from types import TracebackType
-from typing import Tuple, Optional, Sequence, cast
+from typing import Tuple, Sequence, cast
 
 import aiohttp
 from async_lru import alru_cache
@@ -26,13 +26,13 @@ class PokeApiClient:
     async def pokemon(self, id_or_name: int | str) -> Pokemon:
         return await self._get_resource('pokemon', id_or_name, Pokemon)
 
-    async def pokemon_list(self, limit: Optional[int]=None, offset: Optional[int]=None) -> NamedApiResourceList[Pokemon]:
+    async def pokemon_list(self, limit: int | None=None, offset: int | None=None) -> NamedApiResourceList[Pokemon]:
         return await self._get_resource_list('pokemon', limit, offset, Pokemon)
 
     async def pokemon_species(self, id_or_name: int | str) -> PokemonSpecies:
         return await self._get_resource('pokemon-species', id_or_name, PokemonSpecies)
 
-    async def pokemon_species_list(self, limit: Optional[int]=None, offset: Optional[int]=None) -> NamedApiResourceList[PokemonSpecies]:
+    async def pokemon_species_list(self, limit: int | None=None, offset: int | None=None) -> NamedApiResourceList[PokemonSpecies]:
         return await self._get_resource_list('pokemon-species', limit, offset, PokemonSpecies)
 
 
@@ -40,7 +40,7 @@ class PokeApiClient:
         resource = await self._get_model(clas, f'{self.endpoint}/api/v2/{resource}/{id_or_name}')
         return cast(T, resource)
 
-    async def _get_resource_list[T: PokeApiBaseType](self, resource: str, limit: Optional[int], offset: Optional[int], clas: type[T]) -> NamedApiResourceList[T]:
+    async def _get_resource_list[T: PokeApiBaseType](self, resource: str, limit: int | None, offset: int | None, clas: type[T]) -> NamedApiResourceList[T]:
         # Mypy wants to be able to resolve this statically but it can't, so we suppress this.
         resource_list_type = NamedApiResourceList[clas] # type: ignore [valid-type]
         resource_list = await self._get_model(resource_list_type, f'{self.endpoint}/api/v2/{resource}', PokeApiClient._to_params(limit, offset))
@@ -48,7 +48,7 @@ class PokeApiClient:
 
 
     @staticmethod
-    def _to_params(limit: Optional[int]=None, offset: Optional[int]=None) -> Sequence[Tuple[str, int]]:
+    def _to_params(limit: int | None=None, offset: int | None=None) -> Sequence[Tuple[str, int]]:
         return [(key, value)
                 for key, value in [('limit', limit), ('offset', offset)]
                 if value]

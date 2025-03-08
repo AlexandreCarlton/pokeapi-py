@@ -4,8 +4,6 @@ Species all models used for loading data.
 Naming should derive from https://pokeapi.co/docs/v2
 """
 
-from typing import Optional
-
 from pokeapi.v2.base import PokeApiBaseType
 from pokeapi.v2.resource import ApiResource, NamedApiResource
 
@@ -32,12 +30,12 @@ class PokemonColor(NamedPokeApiType):
     pokemon_species: list[NamedApiResource['PokemonSpecies']]
 
 class PokemonSpecies(NamedPokeApiType):
-    base_happiness: Optional[int]
+    base_happiness: int | None
     capture_rate: int
     color: NamedApiResource['PokemonColor']
 
 class PokemonSprites(PokeApiBaseType):
-    front_default: Optional[str]
+    front_default: str | None
 
 class PokemonStat(PokeApiBaseType):
     base_stat: int
