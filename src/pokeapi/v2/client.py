@@ -1,5 +1,5 @@
 from types import TracebackType
-from typing import Tuple, Sequence, cast
+from typing import cast
 
 import aiohttp
 from async_lru import alru_cache
@@ -48,14 +48,14 @@ class PokeApiClient:
 
 
     @staticmethod
-    def _to_params(limit: int | None=None, offset: int | None=None) -> Sequence[Tuple[str, int]]:
-        return [(key, value)
-                for key, value in [('limit', limit), ('offset', offset)]
-                if value]
+    def _to_params(limit: int | None=None, offset: int | None=None) -> tuple[tuple[str, int], ...]:
+        return tuple((key, value)
+                     for key, value in [('limit', limit), ('offset', offset)]
+                     if value)
 
 
     @alru_cache(maxsize=None)
-    async def _get_model[T: PokeApiBaseType](self, clas: type[T], url: str, params: Sequence[Tuple[str, int]]=()) -> T:
+    async def _get_model[T: PokeApiBaseType](self, clas: type[T], url: str, params: tuple[tuple[str, int], ...]=()) -> T:
         """Downloads JSON from a given URL, parses it, and memoizes it."""
         async with self._session.get(url, params=params) as response:
             json_response = await response.json()
